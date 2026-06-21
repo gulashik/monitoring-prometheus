@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["node-exporter:9100"] # Используем как адресс node-exporter т.к. в compose указываем сеть
+
+  - job_name: "node-exporter2"
+    static_configs:
+      - targets: ["node-exporter2:9100"] # Используем как адресс node-exporter т.к. в compose указываем сеть
+
+  - job_name: "nginx-exporter"
+    static_configs:
+      - targets: ["nginx-exporter:9113"] # Используем как адресс node-exporter т.к. в compose указываем сеть
+
+  - job_name: "postgres-exporter"
+    static_configs:
+      - targets: ["postgres-exporter:9187"] # Используем как адресс node-exporter т.к. в compose указываем сеть

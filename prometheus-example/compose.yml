@@ -1,0 +1,102 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.4
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      # bind mount: локальный файл конфигурации ./prometheus/prometheus.yml пробрасывается внутрь контейнера
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro 
+      # named volume: prometheus_data, куда Prometheus пишет свою базу time-series.
+      - prometheus_data:/prometheus 
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle" # перезапустить curl -X POST http://localhost:9090/-/reload
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  # node-exporter - собирает метрики хоста (CPU, память, диск, сеть, файловые системы) и отдаёт их в формате Prometheus по `/metrics`.
+  node-exporter:
+    image: prom/node-exporter:v1.11.1
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    command:
+      - "--path.rootfs=/host" # замапленный /host на read only папку /
+    # --web.telemetry-path="/node" - отдавать по url. По умолчанию /metrics
+    volumes:
+      - /:/host:ro,rslave # мапим / на /host
+    restart: unless-stopped
+    networks:
+      - monitoring
+  
+  node-exporter2:
+    image: prom/node-exporter:v1.11.1
+    container_name: node-exporter2
+    ports:
+      - "9101:9100"
+    command:
+      - "--path.rootfs=/host" # замапленный /host на read only папку /
+    # --web.telemetry-path="/node" - отдавать по url. По умолчанию /metrics
+    volumes:
+      - /:/host:ro,rslave # мапим / на /host
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+
+  nginx:
+    container_name: nginx
+    image: nginx:1.31.2
+    ports:
+      - 8080:80
+    volumes:
+      - './nginx/server.conf:/etc/nginx/conf.d/default.conf'
+    networks:
+      - monitoring
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.5.1
+    container_name: nginx-exporter
+    depends_on:
+      - nginx
+    ports:
+      - 9113:9113
+    command:
+      - '--nginx.scrape-uri=http://nginx:80/stub_status'
+    networks:
+      - monitoring
+
+  postgres:
+    container_name: postgres
+    image: postgres:17.5
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - 5432:5432
+    networks:
+      - monitoring
+
+  postgres-exporter:
+    container_name: postgres-exporter
+    image: prometheuscommunity/postgres-exporter:v0.17.1
+    depends_on:
+      - postgres
+    ports:
+      - 9187:9187
+    environment:
+      # подключения к базе: postgresql://<юзер>:<пароль>@<хост>:<порт>/<база данных>
+      DATA_SOURCE_NAME: "postgresql://postgres:password@postgres:5432/postgres?sslmode=disable"
+    networks:
+      - monitoring
+
+volumes:
+  prometheus_data: # named volume: Docker создаёт и управляет им сам
+
+networks:
+  monitoring:
+    driver: bridge 
