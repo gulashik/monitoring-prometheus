@@ -34,6 +34,10 @@ curl --request GET -sL \
 ```shell
 open http://localhost:9090/targets
 ```
+```shell
+# по умолчанию так и есть login: admin pass: admin
+open http://localhost:3000
+```
 
 ### Логи последние 100 строк за последний час
 ```shell

@@ -1,4 +1,17 @@
 services:
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:11.6.15-ubuntu
+    volumes:
+      # named volume: grafana-data
+      - 'grafana-data:/var/lib/grafana'
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin # по умолчанию так и есть login admin pass admin
+    networks:
+      - monitoring
+
   prometheus:
     image: prom/prometheus:v3.5.4
     container_name: prometheus
@@ -96,6 +109,7 @@ services:
 
 volumes:
   prometheus_data: # named volume: Docker создаёт и управляет им сам
+  grafana-data:
 
 networks:
   monitoring:
