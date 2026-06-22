@@ -30,6 +30,12 @@ services:
     networks:
       - monitoring
 
+  alertmanager:
+    container_name: alertmanager
+    image: prom/alertmanager:v0.33.0
+    ports:
+      - 9093:9093
+
   # node-exporter - собирает метрики хоста (CPU, память, диск, сеть, файловые системы) и отдаёт их в формате Prometheus по `/metrics`.
   node-exporter:
     image: prom/node-exporter:v1.11.1

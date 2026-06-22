@@ -32,11 +32,18 @@ curl --request GET -sL \
      --url 'http://localhost:9100/metrics'
 ```
 ```shell
+# prometheus
 open http://localhost:9090/targets
 ```
 ```shell
+# grafana
 # по умолчанию так и есть login: admin pass: admin
 open http://localhost:3000
+```
+
+```shell
+# allertmanager 
+open http://localhost:9093
 ```
 
 ### Логи последние 100 строк за последний час
