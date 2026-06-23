@@ -1,5 +1,3 @@
-
-
 ### Остановить и удалить
 ```shell
 clear
@@ -13,16 +11,16 @@ podman compose down -v
 podman ps -a
 ```
 
-### Логи последние 100 строк за последний час
-```shell
-podman compose logs -f --tail 100 --since 1h 
-```
-
 ### Запускаем 
 ```shell
 clear
 podman compose up -d
 podman ps -a
+```
+
+### Логи последние 100 строк за последний час
+```shell
+podman compose logs -f --tail 100 --since 1h 
 ```
 
 ### Метрики node-exporter
@@ -44,6 +42,11 @@ open http://localhost:3000
 ```shell
 # allertmanager 
 open http://localhost:9093
+```
+
+```shell
+# notify от allertmanager
+open http://localhost:8888/alerts
 ```
 
 ### Логи последние 100 строк за последний час

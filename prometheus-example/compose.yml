@@ -18,8 +18,9 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      # bind mount: локальный файл конфигурации ./prometheus/prometheus.yml пробрасывается внутрь контейнера
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro 
+      # bind mount: локальные файлы конфигурации пробрасываются внутрь контейнера
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules/actual_rules:/etc/prometheus/rules:ro
       # named volume: prometheus_data, куда Prometheus пишет свою базу time-series.
       - prometheus_data:/prometheus 
     command:
@@ -33,8 +34,18 @@ services:
   alertmanager:
     container_name: alertmanager
     image: prom/alertmanager:v0.33.0
+    volumes:
+      - ./prometheus/alerts/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./prometheus/alerts/templates:/etc/alertmanager/templates:ro
     ports:
       - 9093:9093
+    environment:
+      - '--config.file=/etc/alertmanager/alertmanager.yml' # по умолчанию так и есть. Путь к файлу конфигурации Alertmanager.
+      - '--storage.path=/alertmanager' # по умолчанию так и есть. Путь к директории для хранения данных Alertmanager.
+      - '--web.listen-address=:9093' # по умолчанию так и есть. Адрес и порт, на которых Alertmanager слушает HTTP-запросы.
+      - '--web.route-prefix=/alertmanager' # по умолчанию так и есть. Префикс URL-адреса для Alertmanager.
+    networks:
+      - monitoring
 
   # node-exporter - собирает метрики хоста (CPU, память, диск, сеть, файловые системы) и отдаёт их в формате Prometheus по `/metrics`.
   node-exporter:
@@ -110,6 +121,18 @@ services:
     environment:
       # подключения к базе: postgresql://<юзер>:<пароль>@<хост>:<порт>/<база данных>
       DATA_SOURCE_NAME: "postgresql://postgres:password@postgres:5432/postgres?sslmode=disable"
+    networks:
+      - monitoring
+
+  ntfy:
+    container_name: ntfy
+    image: binwiederhier/ntfy:v2.11.0
+    command:
+      - serve
+    environment:
+      - NTFY_BASE_URL=http://localhost:8888
+    ports:
+      - 8888:80
     networks:
       - monitoring
 
