@@ -43,10 +43,39 @@ open http://localhost:3000
 # allertmanager 
 open http://localhost:9093
 ```
-
 ```shell
 # notify от allertmanager
 open http://localhost:8888/alerts
+```
+
+```shell
+# pushgateway
+open http://localhost:9091
+```
+```shell
+# Отправка в Pushgateway
+# Prometheus метрики представлены в виде специальных комментариев HELP и TYPE, 
+#   а также самого временного ряда с названием метрики, лейблами и значением и 
+#   именно в таком формате мы должны отправить её в Pushgateway
+cat <<EOF | curl --data-binary @- -XPOST http://localhost:9091/metrics/job/example-job
+# HELP example_metrics_for_pushgateway Example of a metric sent to Pushgateway.
+# TYPE example_metrics_for_pushgateway counter
+example_metrics_for_pushgateway{label="value"} 117
+EOF
+
+cat <<EOF | curl --data-binary @- -XPOST http://localhost:9091/metrics/job/gitlab-ci/branch/main/project/prometheus
+# HELP ci_pipeline_status Status of the latest CI/CD pipeline
+# TYPE ci_pipeline_status gauge
+ci_pipeline_status 1
+# HELP ci_job_duration_seconds Duration of the CI/CD job in seconds
+# TYPE ci_job_duration_seconds gauge
+ci_job_duration_seconds 135
+EOF
+```
+```shell
+# Удаление метрик по группирующему ключу в Pushgateway 
+# Pushgateway НЕ УДАЛЯЕТ метрики автоматически. Если они больше не нужны, это придется сделать вручную.
+curl -XDELETE http://localhost:9091/metrics/job/gitlab-ci/branch/main/project/prometheus
 ```
 
 ### Логи последние 100 строк за последний час

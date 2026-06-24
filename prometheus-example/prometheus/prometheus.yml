@@ -44,3 +44,8 @@ scrape_configs:
   - job_name: "postgres-exporter"
     static_configs:
       - targets: ["postgres-exporter:9187"] # Используем как адресс node-exporter т.к. в compose указываем сеть
+
+  - job_name: "pushgateway"
+    static_configs:
+      - targets:
+          - "pushgateway:9091" # Используем как адресс node-exporter т.к. в compose указываем сеть
