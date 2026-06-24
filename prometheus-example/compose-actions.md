@@ -34,6 +34,10 @@ curl --request GET -sL \
 open http://localhost:9090/targets
 ```
 ```shell
+# prometheus federation(prometheus который собирает метрики из другого prometheus)
+open http://localhost:9099/targets
+```
+```shell
 # grafana
 # по умолчанию так и есть login: admin pass: admin
 open http://localhost:3000

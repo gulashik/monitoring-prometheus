@@ -10,6 +10,10 @@ global:
   scrape_interval: 15s
   scrape_timeout: 10s
   evaluation_interval: 15s
+  # В вышестоящем Prometheus Server будет виден в каждой метрики доп label region="prometheus-low-level-for-federation"
+  # без external_labels будет невозможно понять, из какой зоны или кластера пришла метрика.
+  external_labels:
+    region: 'prometheus-low-level-for-federation'
 
 # Настройка Alertmanager
 alerting:

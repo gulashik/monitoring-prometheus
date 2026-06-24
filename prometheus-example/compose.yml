@@ -31,6 +31,26 @@ services:
     networks:
       - monitoring
 
+  prometheus-federation:
+    image: prom/prometheus:v3.5.4
+    container_name: prometheus-federation
+    ports:
+      - "9099:9090"
+    volumes:
+      # bind mount: локальные файлы конфигурации пробрасываются внутрь контейнера
+      - ./prometheus/prometheus-top.yml:/etc/prometheus/prometheus.yml:ro
+      # named volume: prometheus_fed_data, куда Prometheus пишет свою базу time-series.
+      - prometheus_fed_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle" # перезапустить curl -X POST http://localhost:9099/-/reload
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
   alertmanager:
     container_name: alertmanager
     image: prom/alertmanager:v0.33.0
@@ -146,6 +166,7 @@ services:
 
 volumes:
   prometheus_data: # named volume: Docker создаёт и управляет им сам
+  prometheus_fed_data:
   grafana-data:
 
 networks:
